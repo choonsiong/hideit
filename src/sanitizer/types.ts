@@ -1,6 +1,6 @@
-export type Category = "email" | "secret" | "token" | "id" | "privateKey" | "ip" | "card" | "custom";
+export type Category = "email" | "secret" | "token" | "id" | "privateKey" | "ip" | "card" | "custom" | "word";
 
-/** Categories the user can switch on and off. "custom" is enabled by listing custom keys. */
+/** Categories the user can switch on and off. "custom" and "word" are enabled by listing custom keys or words. */
 export const TOGGLEABLE_CATEGORIES = ["email", "secret", "token", "id", "privateKey", "ip", "card"] as const;
 export type ToggleableCategory = (typeof TOGGLEABLE_CATEGORIES)[number];
 
@@ -13,6 +13,7 @@ export const CATEGORY_LABELS: Record<Category, string> = {
   ip: "IPv4 addresses",
   card: "Credit cards",
   custom: "Custom keys",
+  word: "Custom words",
 };
 
 export interface SanitizeOptions {
@@ -21,13 +22,15 @@ export interface SanitizeOptions {
   consistent: boolean;
   /** Extra key names whose values are always replaced. */
   extraKeys: string[];
+  /** Words (e.g. a username) replaced wherever they appear, always with the same random word. */
+  extraWords: string[];
 }
 
 /**
  * How a span's replacement is generated.
  * "key" spans were found through a sensitive key name, so the generator inspects the value's shape.
  */
-export type SpanKind = "key" | "email" | "token" | "uuid" | "pem" | "ip" | "card" | "password";
+export type SpanKind = "key" | "email" | "token" | "uuid" | "pem" | "ip" | "card" | "password" | "word";
 
 export interface Span {
   start: number;
@@ -54,5 +57,6 @@ export function defaultOptions(): SanitizeOptions {
     categories: { email: true, secret: true, token: true, id: true, privateKey: true, ip: true, card: true },
     consistent: true,
     extraKeys: [],
+    extraWords: [],
   };
 }

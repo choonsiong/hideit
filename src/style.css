@@ -19,6 +19,7 @@
   --c-ip: 13 148 136;
   --c-card: 22 163 74;
   --c-custom: 100 116 139;
+  --c-word: 101 163 13;
   --mark-alpha: 0.16;
 }
 
@@ -43,6 +44,7 @@
 .cat-ip { --c: var(--c-ip); }
 .cat-card { --c: var(--c-card); }
 .cat-custom { --c: var(--c-custom); }
+.cat-word { --c: var(--c-word); }
 
 * {
   box-sizing: border-box;
@@ -149,7 +151,7 @@ h1 {
   accent-color: var(--accent);
 }
 
-.custom-keys {
+.list-field {
   display: inline-flex;
   align-items: center;
   gap: 8px;

@@ -137,6 +137,44 @@ export function fakeCard(original: string, rng: Rng): string {
   return original.replace(/\d/g, () => fake[i++]!);
 }
 
+// Neutral words used as pseudonyms for custom words such as a username.
+const WORDS = [
+  "acorn", "amber", "anchor", "aspen", "aurora", "badger", "bamboo", "basil", "beacon", "birch",
+  "bison", "breeze", "brook", "cactus", "canyon", "cedar", "cherry", "cliff", "clover", "cobalt",
+  "comet", "coral", "cypress", "dahlia", "delta", "dune", "eagle", "ember", "falcon", "fern",
+  "fjord", "flint", "forest", "fox", "galaxy", "garnet", "glacier", "granite", "harbor", "hazel",
+  "heron", "hickory", "indigo", "iris", "island", "jade", "jasper", "juniper", "kestrel", "lagoon",
+  "lark", "laurel", "lemon", "lily", "linden", "lotus", "lynx", "magpie", "maple", "marble",
+  "meadow", "mesa", "midnight", "mint", "moss", "nebula", "nimbus", "oak", "ocean", "olive",
+  "onyx", "orchid", "osprey", "otter", "panda", "pebble", "pepper", "pine", "plum", "poplar",
+  "prairie", "quail", "quartz", "raven", "reef", "ridge", "river", "robin", "rowan", "saffron",
+  "sage", "sequoia", "shadow", "sierra", "sparrow", "spruce", "summit", "sunset", "swift", "thistle",
+  "thunder", "tiger", "topaz", "tulip", "tundra", "valley", "velvet", "violet", "walnut", "willow",
+  "winter", "wren", "yarrow", "zephyr",
+];
+
+/** Give `word` the case pattern of `sample`: "Alex" → "Falcon", "ALEX" → "FALCON". */
+function caseLike(sample: string, word: string): string {
+  if (sample.length > 1 && sample === sample.toUpperCase() && sample !== sample.toLowerCase()) return word.toUpperCase();
+  if (sample[0] !== undefined && sample[0] !== sample[0].toLowerCase()) return word[0]!.toUpperCase() + word.slice(1);
+  return word;
+}
+
+/** Re-apply the original's case to a lowercase fake built by fakeWords, run by run. */
+export function matchCase(original: string, fake: string): string {
+  const runs = original.match(/\p{L}+/gu) ?? [];
+  let i = 0;
+  return fake.replace(/\p{L}+/gu, (word) => caseLike(runs[i++] ?? "", word));
+}
+
+/** Each run of letters becomes a random word and each run of digits random digits; separators are kept. */
+export function fakeWords(original: string, rng: Rng): string {
+  const fake = original.replace(/\p{L}+|\p{N}+/gu, (run) =>
+    /\p{N}/u.test(run) ? randomString(rng, DIGITS, run.length) : WORDS[rng.int(WORDS.length)]!,
+  );
+  return matchCase(original, fake);
+}
+
 /** Replacement for a value found through a sensitive key: follow the value's shape first, then the key's category. */
 function replaceKeyedValue(value: string, category: Category, rng: Rng): string {
   if (UUID_RE.test(value)) return fakeUuid(value, rng);
@@ -171,5 +209,7 @@ export function generateReplacement(kind: SpanKind, category: Category, value: s
       return fakeCard(value, rng);
     case "password":
       return fakePassword(rng);
+    case "word":
+      return fakeWords(value, rng);
   }
 }

@@ -2,7 +2,10 @@ import type { Category, Span, SpanKind } from "./types";
 import { keyCategory, normalizeKey } from "./keys";
 import { luhnValid } from "./generators";
 
-/** Higher wins when spans overlap. Key-based matches beat generic patterns; PEM blocks beat everything. */
+/**
+ * Higher wins when spans overlap. Key-based matches beat generic patterns; PEM blocks beat everything.
+ * Custom words come last so a word inside an email or secret never leaves the rest of it behind.
+ */
 const PRIORITY: Record<SpanKind, number> = {
   pem: 100,
   key: 50,
@@ -12,6 +15,7 @@ const PRIORITY: Record<SpanKind, number> = {
   uuid: 20,
   card: 15,
   ip: 10,
+  word: 5,
 };
 
 interface Range {
@@ -215,8 +219,23 @@ function isNonSensitiveIp(ip: string): boolean {
   return ip === "0.0.0.0" || /^(?:127|255)\./.test(ip) || /^(?:192\.0\.2|198\.51\.100|203\.0\.113)\./.test(ip);
 }
 
+/**
+ * Matches any of `words`, case-insensitively, when not touching another ASCII letter or digit:
+ * "alexkim" matches in "/Users/alexkim/" and "alexkim_backup", but "lee" doesn't match in "sleep".
+ */
+export function customWordsRegex(words: readonly string[]): RegExp | null {
+  const unique = [...new Set(words.map((w) => w.trim()).filter(Boolean))].sort((a, b) => b.length - a.length);
+  if (unique.length === 0) return null;
+  const alternatives = unique.map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|");
+  return new RegExp(`(?<![A-Za-z0-9])(?:${alternatives})(?![A-Za-z0-9])`, "giu");
+}
+
 /** Every candidate span in `text`, possibly overlapping. */
-export function detect(text: string, customKeys: ReadonlySet<string> = new Set()): Span[] {
+export function detect(
+  text: string,
+  customKeys: ReadonlySet<string> = new Set(),
+  customWords: readonly string[] = [],
+): Span[] {
   const c = new SpanCollector(text, customKeys);
   const end = (m: RegExpExecArray | RegExpMatchArray) => m.index! + m[0].length;
 
@@ -262,6 +281,10 @@ export function detect(text: string, customKeys: ReadonlySet<string> = new Set()
   }
   for (const m of text.matchAll(CARD_RE)) {
     if (looksLikeCard(m[0].replace(/\D/g, ""))) c.add(m.index!, end(m), "card", "card");
+  }
+  const wordsRe = customWordsRegex(customWords);
+  if (wordsRe) {
+    for (const m of text.matchAll(wordsRe)) c.add(m.index!, end(m), "word", "word");
   }
 
   return c.spans;

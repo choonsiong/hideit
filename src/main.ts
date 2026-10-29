@@ -25,6 +25,7 @@ const NOUNS: Record<Category, [singular: string, plural: string]> = {
   ip: ["IP address", "IP addresses"],
   card: ["card number", "card numbers"],
   custom: ["custom value", "custom values"],
+  word: ["custom word", "custom words"],
 };
 
 const byId = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -34,6 +35,7 @@ const summaryEl = byId<HTMLParagraphElement>("summary");
 const categoriesEl = byId<HTMLDivElement>("categories");
 const consistentEl = byId<HTMLInputElement>("consistent");
 const extraKeysEl = byId<HTMLInputElement>("extra-keys");
+const extraWordsEl = byId<HTMLInputElement>("extra-words");
 const toastEl = byId<HTMLDivElement>("toast");
 
 /** Only settings are persisted, never the input. */
@@ -41,10 +43,12 @@ function loadOptions(): SanitizeOptions {
   const defaults = defaultOptions();
   try {
     const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? "{}") as Partial<SanitizeOptions>;
+    const strings = (list: unknown) => (Array.isArray(list) ? list.filter((k): k is string => typeof k === "string") : []);
     return {
       categories: { ...defaults.categories, ...saved.categories },
       consistent: typeof saved.consistent === "boolean" ? saved.consistent : defaults.consistent,
-      extraKeys: Array.isArray(saved.extraKeys) ? saved.extraKeys.filter((k) => typeof k === "string") : [],
+      extraKeys: strings(saved.extraKeys),
+      extraWords: strings(saved.extraWords),
     };
   } catch {
     return defaults;
@@ -167,11 +171,17 @@ function renderOptions(): void {
     run();
   });
 
-  extraKeysEl.value = options.extraKeys.join(", ");
-  extraKeysEl.addEventListener("input", () => {
-    options.extraKeys = extraKeysEl.value
+  bindList(extraKeysEl, "extraKeys");
+  bindList(extraWordsEl, "extraWords");
+}
+
+/** Keep a comma-separated text field in sync with a list option. */
+function bindList(field: HTMLInputElement, option: "extraKeys" | "extraWords"): void {
+  field.value = options[option].join(", ");
+  field.addEventListener("input", () => {
+    options[option] = field.value
       .split(",")
-      .map((key) => key.trim())
+      .map((item) => item.trim())
       .filter(Boolean);
     saveOptions();
     runSoon();

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fakeCard, fakeIPv4, fakeToken, fakeUuid, luhnValid, scramble, UUID_RE } from "../src/sanitizer/generators";
+import { fakeCard, fakeIPv4, fakeToken, fakeUuid, fakeWords, luhnValid, matchCase, scramble, UUID_RE } from "../src/sanitizer/generators";
 import { createSeededRng } from "../src/sanitizer/random";
 
 const rng = () => createSeededRng(7);
@@ -42,6 +42,18 @@ describe("fakeToken", () => {
     expect(segments[1]).toMatch(/^eyJ/);
     expect(out).toHaveLength(jwt.length);
     expect(out).not.toBe(jwt);
+  });
+});
+
+describe("fakeWords", () => {
+  it("replaces each run of letters with a word and keeps separators, digits' length and case", () => {
+    expect(fakeWords("alexkim", rng())).toMatch(/^[a-z]+$/);
+    expect(fakeWords("Alex Kim", rng())).toMatch(/^[A-Z][a-z]+ [A-Z][a-z]+$/);
+    expect(fakeWords("ACME-Corp88", rng())).toMatch(/^[A-Z]+-[A-Z][a-z]+\d{2}$/);
+  });
+
+  it("matchCase copies the case pattern run by run", () => {
+    expect(matchCase("Alex KIM lee", "amber falcon otter")).toBe("Amber FALCON otter");
   });
 });
 

@@ -17,7 +17,8 @@ Paste text on the left and the sanitized output appears on the right, with each 
 - **Regenerate** picks new random values.
 - The category chips switch detectors on and off.
 - **Same value → same replacement** keeps relationships intact: a repeated email gets the same fake email everywhere.
-- **Custom keys** (comma-separated) force the values of extra keys, such as `username` or `phone`, to be replaced.
+- **Custom keys** (comma-separated) force the values of extra field names, such as `username` or `phone`, to be replaced.
+- **Custom words** (comma-separated) are replaced wherever they appear, for example your username inside `/Users/<name>/…` paths. Each word always maps to the same random word (`alexkim` → `falcon`, keeping the case: `Alexkim` → `Falcon`). Matching is case-insensitive and whole-word, so `lee` won't touch `sleep`.
 
 ## What gets replaced
 
@@ -30,6 +31,7 @@ Paste text on the left and the sanitized output appears on the right, with each 
 | Private keys | PEM `-----BEGIN … PRIVATE KEY-----` blocks, including inside JSON strings | header and footer kept, body randomized |
 | IPv4 addresses | any IPv4 except `127.*`, `0.0.0.0`, `255.*` | address in the documentation ranges `192.0.2.0/24`, `198.51.100.0/24`, `203.0.113.0/24` |
 | Credit cards | 13–19 digit numbers with a card network prefix that pass the Luhn check | Luhn-valid random number, same network digit and separators |
+| Custom words | words you list, anywhere in the text | the same random word every time, with the original's case |
 
 Key/value pairs are recognized in JSON (including JSON embedded in JSON strings), YAML, `.env` files, HTTP headers, query strings, `--flag value` / `--flag=value`, `-Dprop=value`, Python/PHP/JS dictionaries and XML tags. Values in flat arrays (`"ids": [1, 2]`) are replaced too.
 
@@ -42,7 +44,8 @@ Values that aren't secrets are left alone: `null`/`true`/`false`, masks like `**
 - A secret with no recognizable key or format can't be detected, for example a bare password in prose. Add its key under **Custom keys**, or edit it by hand.
 - Ambiguous short flags such as `-p` aren't treated as passwords, because `mkdir -p` and `docker -p 8080:80` are far more common than `mysql -psecret`.
 - Unquoted values stop at whitespace. A YAML password containing spaces is only fully replaced when it's quoted.
-- Names, phone numbers, addresses and hostnames aren't detected by default. Use **Custom keys** for fields like `username` or `phone`.
+- Names, phone numbers, addresses and hostnames aren't detected by default. Use **Custom keys** for fields like `username` or `phone`, and **Custom words** for specific names that appear anywhere.
+- A custom word inside an email or a secret is replaced as part of that whole value, not by its pseudonym, so nothing around it is left behind.
 
 Always review the output before sharing it.
 

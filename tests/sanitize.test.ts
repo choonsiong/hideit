@@ -186,6 +186,39 @@ describe("options", () => {
     expect(output).not.toContain("hunter2");
   });
 
+  it("custom words are replaced everywhere with one consistent pseudonym", () => {
+    const input = `{
+  "projectsDirectory": "/Users/alexkim/.claude/projects",
+  "configDirectory": "/Users/alexkim/.claude",
+  "email": "alexkim.lee@example.net",
+  "orgName": "alexkim.lee@example.net's Organization",
+  "username": "alexkim",
+  "greeting": "Hi Alexkim, ALEXKIM_HOME is set"
+}`;
+    const { output, findings } = run(input, { extraWords: ["alexkim"] });
+    expect(output.toLowerCase()).not.toContain("alexkim");
+    const word = output.match(/"\/Users\/([a-z]+)\/\.claude\/projects"/)![1]!;
+    const capitalized = word[0]!.toUpperCase() + word.slice(1);
+    expect(output).toContain(`"configDirectory": "/Users/${word}/.claude"`);
+    expect(output).toContain(`"username": "${word}"`);
+    expect(output).toContain(`"greeting": "Hi ${capitalized}, ${word.toUpperCase()}_HOME is set"`);
+    // The email is replaced as a whole, so no part of it ("lee@example.net") is left behind.
+    expect(output).not.toContain("lee@example.net");
+    expect(output).toMatch(/"orgName": "[a-z]{8}@example\.com's Organization"/);
+    expect(findings.filter((f) => f.category === "word")).toHaveLength(5);
+  });
+
+  it("custom words only match whole words, case-insensitively, with regex characters taken literally", () => {
+    const { output } = run("lee sleep Lee fleet a.b axb", { extraWords: ["lee", "a.b"] });
+    expect(output).toMatch(/^[a-z]+ sleep [A-Z][a-z]+ fleet [a-z]+\.[a-z]+ axb$/);
+    expect(output).not.toMatch(/\blee\b/i);
+  });
+
+  it("custom words stay consistent even when consistent mode is off", () => {
+    const values = replaced("bob and bob and Bob", { consistent: false, extraWords: ["bob"] }).map((r) => r.value.toLowerCase());
+    expect(new Set(values).size).toBe(1);
+  });
+
   it("custom keys are always replaced", () => {
     const { output } = run(text, { extraKeys: ["Customer Name"] });
     expect(output).toMatch(/"customer_name": "[A-Z][a-z]{4}"/);
