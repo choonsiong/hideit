@@ -19,6 +19,7 @@ Paste text on the left and the sanitized output appears on the right, with each 
 - **Same value → same replacement** keeps relationships intact: a repeated email gets the same fake email everywhere.
 - **Custom keys** (comma-separated) force the values of extra field names, such as `username` or `phone`, to be replaced.
 - **Custom words** (comma-separated) are replaced wherever they appear, for example your username inside `/Users/<name>/…` paths. Each word always maps to the same random word (`alexkim` → `falcon`, keeping the case: `Alexkim` → `Falcon`). Matching is case-insensitive and whole-word, so `lee` won't touch `sleep`.
+- **System / Light / Dark** in the header picks the theme. System follows your OS setting. The choice is remembered.
 
 ## What gets replaced
 
