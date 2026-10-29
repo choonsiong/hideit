@@ -65,6 +65,10 @@ npm run preview    # serve dist/ at http://localhost:4173
 
 `.github/workflows/deploy.yml` tests, builds and publishes `dist/` on every push to `main`. In the repository go to **Settings → Pages → Build and deployment** and set **Source** to **GitHub Actions**. With "Deploy from a branch", Pages serves the unbuilt source `index.html`, which can't load `src/main.ts`, so you get an unstyled page that doesn't work. Asset paths are relative, so the site works under a sub-path such as `/hideit/`.
 
+### Releases
+
+Changes reach `main` through pull requests. After each merge, `main` is tagged with the next version: minor (`v0.1.0` → `v0.2.0`) when a `feat/` branch was merged, otherwise patch (`v0.1.0` → `v0.1.1`). Pushing a `vX.Y.Z` tag runs `.github/workflows/release.yml`, which publishes the "vX.Y.Z release" GitHub release with notes generated from the merged pull requests. It refuses tags that aren't on `main`. A release doesn't deploy anything: the site is deployed by `deploy.yml` when `main` changes.
+
 ### Layout
 
 ```
