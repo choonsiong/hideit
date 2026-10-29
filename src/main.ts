@@ -12,6 +12,8 @@ import {
 import { SAMPLE } from "./sample";
 
 const SETTINGS_KEY = "hideit:settings";
+// Also read by public/theme.js, which applies the theme before first paint.
+const THEME_KEY = "hideit:theme";
 const DEBOUNCE_MS = 150;
 // Live typing keeps adding partial values to the memory; start over if it grows too large.
 const MEMORY_LIMIT = 10_000;
@@ -188,6 +190,27 @@ function bindList(field: HTMLInputElement, option: "extraKeys" | "extraWords"): 
   });
 }
 
+type Theme = "system" | "light" | "dark";
+
+function renderThemeSwitch(): void {
+  const root = document.documentElement;
+  const current: Theme = root.dataset.theme === "light" || root.dataset.theme === "dark" ? root.dataset.theme : "system";
+  for (const radio of document.querySelectorAll<HTMLInputElement>('input[name="theme"]')) {
+    radio.checked = radio.value === current;
+    radio.addEventListener("change", () => {
+      const theme = radio.value as Theme;
+      if (theme === "system") delete root.dataset.theme;
+      else root.dataset.theme = theme;
+      try {
+        if (theme === "system") localStorage.removeItem(THEME_KEY);
+        else localStorage.setItem(THEME_KEY, theme);
+      } catch {
+        // Storage unavailable: the theme applies until the page is reloaded.
+      }
+    });
+  }
+}
+
 inputEl.addEventListener("input", runSoon);
 byId("copy").addEventListener("click", () => void copyOutput());
 byId("regenerate").addEventListener("click", () => {
@@ -208,5 +231,6 @@ byId("sample").addEventListener("click", () => {
 });
 
 renderOptions();
+renderThemeSwitch();
 run();
 inputEl.focus();

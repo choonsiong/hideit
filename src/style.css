@@ -1,12 +1,13 @@
 :root {
+  /* light-dark() picks a value from the active color-scheme: the OS setting, or the theme switch. */
   color-scheme: light dark;
-  --bg: #f6f6f8;
-  --surface: #ffffff;
-  --border: #dcdce2;
-  --text: #1b1b21;
-  --muted: #61616b;
-  --accent: #2f5bea;
-  --accent-text: #ffffff;
+  --bg: light-dark(#f6f6f8, #111115);
+  --surface: light-dark(#ffffff, #1a1a20);
+  --border: light-dark(#dcdce2, #2f2f38);
+  --text: light-dark(#1b1b21, #e8e8ec);
+  --muted: light-dark(#61616b, #9b9ba6);
+  --accent: light-dark(#2f5bea, #6d8dff);
+  --accent-text: light-dark(#ffffff, #0c0c10);
   --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
 
@@ -20,20 +21,14 @@
   --c-card: 22 163 74;
   --c-custom: 100 116 139;
   --c-word: 101 163 13;
-  --mark-alpha: 0.16;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #111115;
-    --surface: #1a1a20;
-    --border: #2f2f38;
-    --text: #e8e8ec;
-    --muted: #9b9ba6;
-    --accent: #6d8dff;
-    --accent-text: #0c0c10;
-    --mark-alpha: 0.28;
-  }
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
 }
 
 .cat-email { --c: var(--c-email); }
@@ -84,6 +79,49 @@ h1 {
 .tagline {
   margin: 2px 0 0;
   color: var(--muted);
+}
+
+.header-side {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.theme-switch {
+  display: inline-flex;
+  padding: 2px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 13px;
+}
+
+.theme-switch label {
+  position: relative;
+  padding: 3px 12px;
+  border-radius: 999px;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.theme-switch input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.theme-switch label:has(input:checked) {
+  background: color-mix(in srgb, var(--accent) 18%, var(--surface));
+  color: var(--text);
+  font-weight: 600;
+}
+
+.theme-switch label:has(input:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
 }
 
 .badge {
@@ -232,7 +270,7 @@ pre:empty::before {
 
 mark {
   border-radius: 3px;
-  background: rgb(var(--c) / var(--mark-alpha));
+  background: light-dark(rgb(var(--c) / 0.16), rgb(var(--c) / 0.28));
   box-shadow: inset 0 -2px 0 rgb(var(--c) / 0.75);
   color: inherit;
 }

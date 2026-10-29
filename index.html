@@ -7,6 +7,7 @@
     <meta name="referrer" content="no-referrer" />
     <title>HideIt: replace sensitive data with random values</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232f5bea'/%3E%3Cpath d='M8 16h16' stroke='white' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E" />
+    <script src="/theme.js"></script>
     <script type="module" src="/src/main.ts"></script>
   </head>
   <body>
@@ -16,7 +17,14 @@
           <h1>HideIt</h1>
           <p class="tagline">Replace emails, passwords, tokens and IDs with random values before you share text.</p>
         </div>
-        <p class="badge">Runs entirely in your browser. Nothing you paste is sent or stored.</p>
+        <div class="header-side">
+          <p class="badge">Runs entirely in your browser. Nothing you paste is sent or stored.</p>
+          <div class="theme-switch" role="radiogroup" aria-label="Theme">
+            <label><input type="radio" name="theme" value="system" />System</label>
+            <label><input type="radio" name="theme" value="light" />Light</label>
+            <label><input type="radio" name="theme" value="dark" />Dark</label>
+          </div>
+        </div>
       </header>
 
       <section class="options" aria-label="Options">
