@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="referrer" content="no-referrer" />
+    <title>HideIt: replace sensitive data with random values</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232f5bea'/%3E%3Cpath d='M8 16h16' stroke='white' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E" />
+    <script type="module" src="/src/main.ts"></script>
+  </head>
+  <body>
+    <div class="app">
+      <header>
+        <div>
+          <h1>HideIt</h1>
+          <p class="tagline">Replace emails, passwords, tokens and IDs with random values before you share text.</p>
+        </div>
+        <p class="badge">Runs entirely in your browser. Nothing you paste is sent or stored.</p>
+      </header>
+
+      <section class="options" aria-label="Options">
+        <div id="categories" class="chips" role="group" aria-label="What to replace"></div>
+        <label class="toggle">
+          <input id="consistent" type="checkbox" />
+          Same value → same replacement
+        </label>
+        <label class="custom-keys">
+          Custom keys
+          <input id="extra-keys" type="text" placeholder="e.g. username, phone" spellcheck="false" autocomplete="off" />
+        </label>
+      </section>
+
+      <main class="panes">
+        <section class="pane">
+          <div class="pane-head">
+            <label for="input">Input</label>
+            <div class="actions">
+              <button id="sample" type="button">Load sample</button>
+              <button id="clear" type="button">Clear</button>
+            </div>
+          </div>
+          <textarea
+            id="input"
+            spellcheck="false"
+            autocomplete="off"
+            autocapitalize="off"
+            placeholder="Paste JSON, logs, .env files, shell commands, HTTP requests…"
+          ></textarea>
+        </section>
+
+        <section class="pane">
+          <div class="pane-head">
+            <span id="output-label">Output</span>
+            <div class="actions">
+              <button id="regenerate" type="button" title="Generate new random values">Regenerate</button>
+              <button id="copy" type="button" class="primary">Copy</button>
+            </div>
+          </div>
+          <pre id="output" tabindex="0" aria-labelledby="output-label"></pre>
+          <p id="summary" class="pane-foot" role="status"></p>
+        </section>
+      </main>
+    </div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>
