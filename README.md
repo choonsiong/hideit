@@ -60,6 +60,10 @@ npm run preview    # serve dist/ at http://localhost:4173
 
 `dist/` is a static site you can host anywhere (GitHub Pages, Cloudflare Pages, any web server). It must be served over HTTP(S): browsers don't load ES modules from `file://`.
 
+### GitHub Pages
+
+`.github/workflows/deploy.yml` tests, builds and publishes `dist/` on every push to `main`. In the repository go to **Settings → Pages → Build and deployment** and set **Source** to **GitHub Actions**. With "Deploy from a branch", Pages serves the unbuilt source `index.html`, which can't load `src/main.ts`, so you get an unstyled page that doesn't work. Asset paths are relative, so the site works under a sub-path such as `/hideit/`.
+
 ### Layout
 
 ```
